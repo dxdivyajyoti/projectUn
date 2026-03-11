@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/retailcrm
+    username: ${DB_USERNAME:divyajyotigadanayak}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.retailcrm: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:retailcrm-super-secret-jwt-key-min-32-chars-long}
+    expiry-ms: 86400000  # 24 hours
+  cors:
+    allowed-origins: http://localhost:5173

@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailCRM — Step-by-Step Build Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #FF6B6B;
+    --primary-light: #FFE8E8;
+    --accent: #4ECDC4;
+    --accent-light: #E0F7F6;
+    --yellow: #FFD93D;
+    --yellow-light: #FFF8DC;
+    --purple: #7C3AED;
+    --purple-light: #EDE9FE;
+    --dark: #1E1B2E;
+    --mid: #6B7280;
+    --light: #F8F7FF;
+    --white: #FFFFFF;
+    --border: #E5E7EB;
+    --code-bg: #1E1B2E;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 4px 20px rgba(30,27,46,0.10);
+    --shadow-hover: 0 8px 30px rgba(30,27,46,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--light); color: var(--dark); line-height: 1.7; }
+
+  /* ── SIDEBAR + LAYOUT ── */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 280px; flex-shrink: 0; background: var(--dark); color: white;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 28px 20px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .sidebar-logo { font-family: 'Sora', sans-serif; font-size: 1.2rem; font-weight: 700; color: white; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo-dot { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
+  .sidebar-logo span { color: var(--primary); }
+  .sidebar-section-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.35); margin-top: 16px; margin-bottom: 4px; padding: 0 8px; }
+  .sidebar-link {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    color: rgba(255,255,255,0.65); transition: all 0.2s; text-decoration: none;
+  }
+  .sidebar-link:hover { background: rgba(255,255,255,0.08); color: white; }
+  .sidebar-link.active { background: var(--primary); color: white; }
+  .sidebar-link .step-num { width: 22px; height: 22px; background: rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; flex-shrink: 0; }
+  .sidebar-link.active .step-num { background: rgba(255,255,255,0.25); }
+  .sidebar-link.done .step-num { background: var(--accent); color: var(--dark); }
+  .sidebar-link.done { color: rgba(255,255,255,0.5); }
+
+  /* ── MAIN ── */
+  .main { flex: 1; padding: 40px; max-width: 900px; }
+  .page-header { margin-bottom: 40px; }
+  .page-header h1 { font-family: 'Sora', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+  .page-header p { color: var(--mid); font-size: 1rem; }
+  .tech-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .tech-badge { padding: 5px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
+  .badge-java { background: #FFF0E0; color: #E07B00; border: 1.5px solid #FFBF69; }
+  .badge-spring { background: #E8F5E9; color: #2E7D32; border: 1.5px solid #A5D6A7; }
+  .badge-react { background: #E3F2FD; color: #1565C0; border: 1.5px solid #90CAF9; }
+  .badge-postgres { background: #E8EAF6; color: #3949AB; border: 1.5px solid #9FA8DA; }
+  .badge-docker { background: #E0F7FA; color: #00838F; border: 1.5px solid #80DEEA; }
+
+  /* ── STEP CARDS ── */
+  .phase { margin-bottom: 48px; }
+  .phase-title {
+    font-family: 'Sora', sans-serif; font-size: 0.8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em; color: white;
+    background: var(--dark); border-radius: 50px; padding: 6px 18px;
+    display: inline-block; margin-bottom: 20px;
+  }
+  .step-card {
+    background: var(--white); border-radius: var(--radius); padding: 28px;
+    margin-bottom: 20px; box-shadow: var(--shadow); border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .step-card:hover { border-color: var(--primary); box-shadow: var(--shadow-hover); }
+  .step-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+  .step-badge {
+    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.2rem; flex-shrink: 0;
+  }
+  .step-badge.setup { background: var(--yellow-light); }
+  .step-badge.backend { background: var(--accent-light); }
+  .step-badge.frontend { background: var(--primary-light); }
+  .step-badge.db { background: var(--purple-light); }
+  .step-badge.deploy { background: #E8F5E9; }
+  .step-info h3 { font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+  .step-info p { color: var(--mid); font-size: 0.88rem; }
+  .step-time { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 700; color: var(--mid); background: var(--light); padding: 3px 10px; border-radius: 50px; margin-top: 6px; }
+
+  /* ── SUB SECTIONS ── */
+  .sub-section { margin-bottom: 20px; }
+  .sub-label { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--mid); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .sub-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--code-bg); border-radius: var(--radius-sm); padding: 18px 20px;
+    overflow-x: auto; margin: 10px 0; position: relative;
+  }
+  .code-block pre { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #E2E8F0; line-height: 1.7; }
+  .code-block .comment { color: #6B7A8D; }
+  .code-block .keyword { color: #F472B6; }
+  .code-block .string { color: #86EFAC; }
+  .code-block .annotation { color: #FCD34D; }
+  .code-block .type { color: #67E8F9; }
+  .code-label { font-size: 0.7rem; font-weight: 700; color: #6B7A8D; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+  .copy-btn {
+    position: absolute; top: 12px; right: 12px; padding: 4px 12px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px; color: rgba(255,255,255,0.5); font-size: 0.72rem;
+    font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+  /* ── CHECKLIST ── */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px;
+    background: var(--light); border-radius: var(--radius-sm); font-size: 0.88rem;
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .check-item:hover { background: var(--primary-light); }
+  .check-item.checked { background: var(--accent-light); text-decoration: line-through; color: var(--mid); }
+  .check-box {
+    width: 20px; height: 20px; border: 2.5px solid var(--border); border-radius: 6px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px; transition: all 0.15s;
+  }
+  .check-item.checked .check-box { background: var(--accent); border-color: var(--accent); color: white; font-size: 0.7rem; }
+
+  /* ── FILE TREE ── */
+  .file-tree { background: var(--code-bg); border-radius: var(--radius-sm); padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 2; }
+  .tree-dir { color: #67E8F9; }
+  .tree-file { color: #E2E8F0; }
+  .tree-comment { color: #6B7A8D; }
+
+  /* ── INFO BOXES ── */
+  .info-box { border-radius: var(--radius-sm); padding: 14px 18px; font-size: 0.88rem; margin: 12px 0; display: flex; gap: 12px; align-items: flex-start; }
+  .info-box.tip { background: var(--accent-light); border-left: 4px solid var(--accent); }
+  .info-box.warn { background: var(--yellow-light); border-left: 4px solid var(--yellow); }
+  .info-box.note { background: var(--purple-light); border-left: 4px solid var(--purple); }
+  .info-box-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .info-box-text { line-height: 1.6; }
+  .info-box-text b { display: block; margin-bottom: 2px; }
+
+  /* ── API TABLE ── */
+  .api-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 10px 0; }
+  .api-table th { background: var(--dark); color: white; padding: 10px 14px; text-align: left; font-weight: 700; }
+  .api-table th:first-child { border-radius: 8px 0 0 0; }
+  .api-table th:last-child { border-radius: 0 8px 0 0; }
+  .api-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  .api-table tr:hover td { background: var(--light); }
+  .method { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+  .get { background: #E8F5E9; color: #2E7D32; }
+  .post { background: #E3F2FD; color: #1565C0; }
+  .put { background: var(--yellow-light); color: #B8860B; }
+  .delete { background: var(--primary-light); color: var(--primary); }
+
+  /* ── PROGRESS ── */
+  .progress-bar-outer { background: var(--border); border-radius: 50px; height: 8px; margin-bottom: 32px; }
+  .progress-bar-inner { background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; border-radius: 50px; transition: width 0.5s ease; }
+  .progress-label { font-size: 0.8rem; font-weight: 700; color: var(--mid); margin-bottom: 6px; display: flex; justify-content: space-between; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="sidebar-logo-dot"></div>Retail<span>CRM</span></div>
+
+  <div class="sidebar-section-label">Phase 1 · Setup</div>
+  <a class="sidebar-link active" href="#step1" onclick="setActive(this)">
+    <div class="step-num">1</div> Project Structure
+  </a>
+  <a class="sidebar-link" href="#step2" onclick="setActive(this)">
+    <div class="step-num">2</div> Dependencies
+  </a>
+
+  <div class="sidebar-section-label">Phase 2 · Backend</div>
+  <a class="sidebar-link" href="#step3" onclick="setActive(this)">
+    <div class="step-num">3</div> Database Schema
+  </a>
+  <a class="sidebar-link" href="#step4" onclick="setActive(this)">
+    <div class="step-num">4</div> Models & Entities
+  </a>
+  <a class="sidebar-link" href="#step5" onclick="setActive(this)">
+    <div class="step-num">5</div> REST API Endpoints
+  </a>
+  <a class="sidebar-link" href="#step6" onclick="setActive(this)">
+    <div class="step-num">6</div> Auth & Security
+  </a>
+
+  <div class="sidebar-section-label">Phase 3 · Frontend</div>
+  <a class="sidebar-link" href="#step7" onclick="setActive(this)">
+    <div class="step-num">7</div> React Setup
+  </a>
+  <a class="sidebar-link" href="#step8" onclick="setActive(this)">
+    <div class="step-num">8</div> Core Screens
+  </a>
+  <a class="sidebar-link" href="#step9" onclick="setActive(this)">
+    <div class="step-num">9</div> API Integration
+  </a>
+
+  <div class="sidebar-section-label">Phase 4 · Ship</div>
+  <a class="sidebar-link" href="#step10" onclick="setActive(this)">
+    <div class="step-num">10</div> Docker & Deploy
+  </a>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>🏗 RetailCRM Build Guide</h1>
+    <p>A complete step-by-step guide to build RetailCRM from scratch using Java Spring Boot + React.</p>
+    <div class="tech-badges">
+      <span class="tech-badge badge-java">☕ Java 17</span>
+      <span class="tech-badge badge-spring">🍃 Spring Boot 3</span>
+      <span class="tech-badge badge-react">⚛ React 18</span>
+      <span class="tech-badge badge-postgres">🐘 PostgreSQL</span>
+      <span class="tech-badge badge-docker">🐳 Docker</span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-label">
+    <span>Your Progress</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <!-- ══════════════════ PHASE 1: SETUP ══════════════════ -->
+  <div class="phase">
+    <div class="phase-title">📦 Phase 1 — Project Setup</div>
+
+    <!-- STEP 1 -->
+    <div class="step-card" id="step1">
+      <div class="step-header">
+        <div class="step-badge setup">🗂</div>
+        <div class="step-info">
+          <h3>Step 1 — Project Structure</h3>
+          <p>Scaffold your monorepo with separate backend and frontend folders.</p>
+          <span class="step-time">⏱ ~30 mins</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Recommended Folder Structure</div>
+        <div class="file-tree">
+<span class="tree-dir">retailcrm/</span>
+├── <span class="tree-dir">backend/</span>          <span class="tree-comment"># Spring Boot app</span>
+│   ├── <span class="tree-dir">src/main/java/com/retailcrm/</span>
+│   │   ├── <span class="tree-dir">controller/</span>   <span class="tree-comment"># REST controllers</span>
+│   │   ├── <span class="tree-dir">service/</span>      <span class="tree-comment"># Business logic</span>
+│   │   ├── <span class="tree-dir">repository/</span>   <span class="tree-comment"># JPA repositories</span>
+│   │   ├── <span class="tree-dir">model/</span>        <span class="tree-comment"># JPA entities</span>
+│   │   ├── <span class="tree-dir">dto/</span>          <span class="tree-comment"># Request/Response DTOs</span>
+│   │   ├── <span class="tree-dir">config/</span>       <span class="tree-comment"># Security, CORS config</span>
+│   │   └── <span class="tree-file">RetailCrmApplication.java</span>
+│   ├── <span class="tree-dir">src/main/resources/</span>
+│   │   ├── <span class="tree-file">application.yml</span>
+│   │   └── <span class="tree-dir">db/migration/</span>   <span class="tree-comment"># Flyway SQL scripts</span>
+│   └── <span class="tree-file">pom.xml</span>
+├── <span class="tree-dir">frontend/</span>         <span class="tree-comment"># React app (Vite)</span>
+│   ├── <span class="tree-dir">src/</span>
+│   │   ├── <span class="tree-dir">pages/</span>
+│   │   ├── <span class="tree-dir">components/</span>
+│   │   ├── <span class="tree-dir">services/</span>     <span class="tree-comment"># API calls</span>
+│   │   └── <span class="tree-dir">hooks/</span>
+│   └── <span class="tree-file">package.json</span>
+├── <span class="tree-file">docker-compose.yml</span>
+└── <span class="tree-file">README.md</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Initialize Backend (Spring Initializr)</div>
+        <div class="code-block">
+          <div class="code-label">Terminal</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="comment"># Use Spring Initializr CLI or go to start.spring.io</span>
+curl https://start.spring.io/starter.zip \
+  -d type=maven-project \
+  -d language=java \
+  -d bootVersion=3.2.0 \
+  -d groupId=com.retailcrm \
+  -d artifactId=backend \
+  -d javaVersion=17 \
+  -d dependencies=web,data-jpa,postgresql,security,validation,flyway \
+  -o backend.zip
+
+unzip backend.zip -d backend</pre>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Initialize Frontend</div>
+        <div class="code-block">
+          <div class="code-label">Terminal</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre>npm create vite@latest frontend -- --template react
+cd frontend
+npm install axios react-router-dom @tanstack/react-query zustand</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-card" id="step2">
+      <div class="step-header">
+        <div class="step-badge setup">📦</div>
+        <div class="step-info">
+          <h3>Step 2 — Maven Dependencies</h3>
+          <p>Add all required dependencies to your <code>pom.xml</code>.</p>
+          <span class="step-time">⏱ ~15 mins</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">pom.xml — Key Dependencies</div>
+        <div class="code-block">
+          <div class="code-label">pom.xml</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="comment">&lt;!-- Spring Boot Starters --&gt;</span>
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;org.springframework.boot&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;spring-boot-starter-web&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;org.springframework.boot&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;spring-boot-starter-data-jpa&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;org.springframework.boot&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;spring-boot-starter-security&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;org.springframework.boot&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;spring-boot-starter-validation&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;
+
+<span class="comment">&lt;!-- Database --&gt;</span>
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;org.postgresql&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;postgresql&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;org.flywaydb&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;flyway-core&lt;/<span class="type">artifactId</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;
+
+<span class="comment">&lt;!-- JWT --&gt;</span>
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;io.jsonwebtoken&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;jjwt-api&lt;/<span class="type">artifactId</span>&gt;
+  &lt;<span class="type">version</span>&gt;0.12.3&lt;/<span class="type">version</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;
+
+<span class="comment">&lt;!-- Lombok (reduce boilerplate) --&gt;</span>
+&lt;<span class="type">dependency</span>&gt;
+  &lt;<span class="type">groupId</span>&gt;org.projectlombok&lt;/<span class="type">groupId</span>&gt;
+  &lt;<span class="type">artifactId</span>&gt;lombok&lt;/<span class="type">artifactId</span>&gt;
+  &lt;<span class="type">optional</span>&gt;true&lt;/<span class="type">optional</span>&gt;
+&lt;/<span class="type">dependency</span>&gt;</pre>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">application.yml</div>
+        <div class="code-block">
+          <div class="code-label">src/main/resources/application.yml</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre>spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/retailcrm
+    username: <span class="string">${DB_USERNAME:postgres}</span>
+    password: <span class="string">${DB_PASSWORD:secret}</span>
+  jpa:
+    hibernate:
+      ddl-auto: validate  <span class="comment"># Flyway handles migrations</span>
+    show-sql: false
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: <span class="string">${JWT_SECRET:your-secret-key-min-32-chars}</span>
+    expiry-ms: 86400000  <span class="comment"># 24 hours</span>
+  cors:
+    allowed-origins: http://localhost:5173</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PHASE 2: BACKEND ══════════════════ -->
+  <div class="phase">
+    <div class="phase-title">☕ Phase 2 — Java Backend</div>
+
+    <!-- STEP 3 -->
+    <div class="step-card" id="step3">
+      <div class="step-header">
+        <div class="step-badge db">🗄</div>
+        <div class="step-info">
+          <h3>Step 3 — Database Schema (Flyway)</h3>
+          <p>Design your PostgreSQL schema with versioned migrations.</p>
+          <span class="step-time">⏱ ~1 hour</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">V1__create_tables.sql</div>
+        <div class="code-block">
+          <div class="code-label">src/main/resources/db/migration/V1__create_tables.sql</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="comment">-- Users (store owners / staff)</span>
+<span class="keyword">CREATE TABLE</span> users (
+  id          UUID <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  email       VARCHAR(255) <span class="keyword">UNIQUE NOT NULL</span>,
+  password    VARCHAR(255) <span class="keyword">NOT NULL</span>,
+  store_name  VARCHAR(255),
+  role        VARCHAR(50) <span class="keyword">DEFAULT</span> <span class="string">'OWNER'</span>,
+  created_at  TIMESTAMP <span class="keyword">DEFAULT</span> now()
+);
+
+<span class="comment">-- Customers</span>
+<span class="keyword">CREATE TABLE</span> customers (
+  id            UUID <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  user_id       UUID <span class="keyword">REFERENCES</span> users(id) <span class="keyword">ON DELETE CASCADE</span>,
+  full_name     VARCHAR(255) <span class="keyword">NOT NULL</span>,
+  phone         VARCHAR(50),
+  email         VARCHAR(255),
+  birthday      DATE,
+  tag           VARCHAR(50) <span class="keyword">DEFAULT</span> <span class="string">'NEW'</span>,  <span class="comment">-- NEW, VIP, AT_RISK</span>
+  notes         TEXT,
+  last_visited  TIMESTAMP,
+  created_at    TIMESTAMP <span class="keyword">DEFAULT</span> now()
+);
+
+<span class="comment">-- Interactions (purchase history / notes)</span>
+<span class="keyword">CREATE TABLE</span> interactions (
+  id           UUID <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  customer_id  UUID <span class="keyword">REFERENCES</span> customers(id) <span class="keyword">ON DELETE CASCADE</span>,
+  type         VARCHAR(50),  <span class="comment">-- VISIT, PURCHASE, CALL, NOTE</span>
+  note         TEXT,
+  amount       DECIMAL(10,2),
+  created_at   TIMESTAMP <span class="keyword">DEFAULT</span> now()
+);
+
+<span class="comment">-- Reminders</span>
+<span class="keyword">CREATE TABLE</span> reminders (
+  id           UUID <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  customer_id  UUID <span class="keyword">REFERENCES</span> customers(id) <span class="keyword">ON DELETE CASCADE</span>,
+  user_id      UUID <span class="keyword">REFERENCES</span> users(id),
+  note         TEXT,
+  due_date     TIMESTAMP <span class="keyword">NOT NULL</span>,
+  completed    BOOLEAN <span class="keyword">DEFAULT FALSE</span>,
+  created_at   TIMESTAMP <span class="keyword">DEFAULT</span> now()
+);
+
+<span class="comment">-- Indexes for performance</span>
+<span class="keyword">CREATE INDEX</span> idx_customers_user_id <span class="keyword">ON</span> customers(user_id);
+<span class="keyword">CREATE INDEX</span> idx_reminders_due <span class="keyword">ON</span> reminders(user_id, due_date, completed);</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-card" id="step4">
+      <div class="step-header">
+        <div class="step-badge backend">🧩</div>
+        <div class="step-info">
+          <h3>Step 4 — JPA Entities & Repositories</h3>
+          <p>Map your DB tables to Java entity classes and add JPA repositories.</p>
+          <span class="step-time">⏱ ~1.5 hours</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Customer Entity</div>
+        <div class="code-block">
+          <div class="code-label">model/Customer.java</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="annotation">@Entity</span>
+<span class="annotation">@Table</span>(name = <span class="string">"customers"</span>)
+<span class="annotation">@Data</span>
+<span class="annotation">@Builder</span>
+<span class="annotation">@NoArgsConstructor</span>
+<span class="annotation">@AllArgsConstructor</span>
+<span class="keyword">public class</span> <span class="type">Customer</span> {
+
+  <span class="annotation">@Id</span>
+  <span class="annotation">@GeneratedValue</span>(strategy = GenerationType.UUID)
+  <span class="keyword">private</span> <span class="type">UUID</span> id;
+
+  <span class="annotation">@ManyToOne</span>(fetch = FetchType.LAZY)
+  <span class="annotation">@JoinColumn</span>(name = <span class="string">"user_id"</span>)
+  <span class="keyword">private</span> <span class="type">User</span> user;
+
+  <span class="annotation">@NotBlank</span>
+  <span class="keyword">private</span> <span class="type">String</span> fullName;
+
+  <span class="keyword">private</span> <span class="type">String</span> phone;
+  <span class="keyword">private</span> <span class="type">String</span> email;
+  <span class="keyword">private</span> <span class="type">LocalDate</span> birthday;
+
+  <span class="annotation">@Enumerated</span>(EnumType.STRING)
+  <span class="keyword">private</span> <span class="type">CustomerTag</span> tag = CustomerTag.NEW;
+
+  <span class="keyword">private</span> <span class="type">String</span> notes;
+  <span class="keyword">private</span> <span class="type">LocalDateTime</span> lastVisited;
+
+  <span class="annotation">@CreationTimestamp</span>
+  <span class="keyword">private</span> <span class="type">LocalDateTime</span> createdAt;
+}</pre>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Customer Repository</div>
+        <div class="code-block">
+          <div class="code-label">repository/CustomerRepository.java</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="annotation">@Repository</span>
+<span class="keyword">public interface</span> <span class="type">CustomerRepository</span> <span class="keyword">extends</span> <span class="type">JpaRepository</span>&lt;<span class="type">Customer</span>, <span class="type">UUID</span>&gt; {
+
+  <span class="type">Page</span>&lt;<span class="type">Customer</span>&gt; findByUserIdOrderByCreatedAtDesc(
+    <span class="type">UUID</span> userId, <span class="type">Pageable</span> pageable);
+
+  <span class="type">Page</span>&lt;<span class="type">Customer</span>&gt; findByUserIdAndTag(
+    <span class="type">UUID</span> userId, <span class="type">CustomerTag</span> tag, <span class="type">Pageable</span> pageable);
+
+  <span class="annotation">@Query</span>(<span class="string">"SELECT c FROM Customer c WHERE c.user.id = :uid "</span> +
+         <span class="string">"AND (LOWER(c.fullName) LIKE %:q% OR c.phone LIKE %:q%)"</span>)
+  <span class="type">List</span>&lt;<span class="type">Customer</span>&gt; search(<span class="annotation">@Param</span>(<span class="string">"uid"</span>) <span class="type">UUID</span> uid,
+                         <span class="annotation">@Param</span>(<span class="string">"q"</span>) <span class="type">String</span> query);
+
+  <span class="type">long</span> countByUserIdAndCreatedAtAfter(<span class="type">UUID</span> userId, <span class="type">LocalDateTime</span> since);
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-card" id="step5">
+      <div class="step-header">
+        <div class="step-badge backend">🔌</div>
+        <div class="step-info">
+          <h3>Step 5 — REST API Endpoints</h3>
+          <p>Build all controllers and service layer with proper DTOs.</p>
+          <span class="step-time">⏱ ~3 hours</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Full API Reference</div>
+        <table class="api-table">
+          <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+          <tr><td><span class="method post">POST</span></td><td>/api/auth/register</td><td>Register new store account</td></tr>
+          <tr><td><span class="method post">POST</span></td><td>/api/auth/login</td><td>Login → returns JWT</td></tr>
+          <tr><td><span class="method get">GET</span></td><td>/api/customers</td><td>List customers (paginated, filterable)</td></tr>
+          <tr><td><span class="method post">POST</span></td><td>/api/customers</td><td>Create new customer</td></tr>
+          <tr><td><span class="method get">GET</span></td><td>/api/customers/{id}</td><td>Get customer profile</td></tr>
+          <tr><td><span class="method put">PUT</span></td><td>/api/customers/{id}</td><td>Update customer</td></tr>
+          <tr><td><span class="method delete">DEL</span></td><td>/api/customers/{id}</td><td>Delete customer</td></tr>
+          <tr><td><span class="method get">GET</span></td><td>/api/customers/search?q=</td><td>Search by name or phone</td></tr>
+          <tr><td><span class="method post">POST</span></td><td>/api/customers/{id}/interactions</td><td>Log interaction</td></tr>
+          <tr><td><span class="method get">GET</span></td><td>/api/reminders</td><td>List reminders (due today first)</td></tr>
+          <tr><td><span class="method post">POST</span></td><td>/api/reminders</td><td>Create reminder</td></tr>
+          <tr><td><span class="method put">PUT</span></td><td>/api/reminders/{id}/complete</td><td>Mark reminder done</td></tr>
+          <tr><td><span class="method get">GET</span></td><td>/api/analytics/summary</td><td>Dashboard stats</td></tr>
+          <tr><td><span class="method get">GET</span></td><td>/api/analytics/segments</td><td>Customer segments count</td></tr>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Customer Controller</div>
+        <div class="code-block">
+          <div class="code-label">controller/CustomerController.java</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>(<span class="string">"/api/customers"</span>)
+<span class="annotation">@RequiredArgsConstructor</span>
+<span class="keyword">public class</span> <span class="type">CustomerController</span> {
+
+  <span class="keyword">private final</span> <span class="type">CustomerService</span> customerService;
+
+  <span class="annotation">@GetMapping</span>
+  <span class="keyword">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">Page</span>&lt;<span class="type">CustomerDTO</span>&gt;&gt; list(
+      <span class="annotation">@AuthenticationPrincipal</span> <span class="type">UserDetails</span> user,
+      <span class="annotation">@RequestParam</span>(defaultValue = <span class="string">"0"</span>) int page,
+      <span class="annotation">@RequestParam</span>(required = false) <span class="type">String</span> tag) {
+    <span class="keyword">return</span> ResponseEntity.ok(customerService.list(user, page, tag));
+  }
+
+  <span class="annotation">@PostMapping</span>
+  <span class="keyword">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">CustomerDTO</span>&gt; create(
+      <span class="annotation">@AuthenticationPrincipal</span> <span class="type">UserDetails</span> user,
+      <span class="annotation">@Valid</span> <span class="annotation">@RequestBody</span> <span class="type">CreateCustomerRequest</span> req) {
+    <span class="keyword">return</span> ResponseEntity.status(201).body(customerService.create(user, req));
+  }
+
+  <span class="annotation">@GetMapping</span>(<span class="string">"/{id}"</span>)
+  <span class="keyword">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">CustomerDTO</span>&gt; get(
+      <span class="annotation">@AuthenticationPrincipal</span> <span class="type">UserDetails</span> user,
+      <span class="annotation">@PathVariable</span> <span class="type">UUID</span> id) {
+    <span class="keyword">return</span> ResponseEntity.ok(customerService.get(user, id));
+  }
+
+  <span class="annotation">@PutMapping</span>(<span class="string">"/{id}"</span>)
+  <span class="keyword">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">CustomerDTO</span>&gt; update(
+      <span class="annotation">@AuthenticationPrincipal</span> <span class="type">UserDetails</span> user,
+      <span class="annotation">@PathVariable</span> <span class="type">UUID</span> id,
+      <span class="annotation">@Valid</span> <span class="annotation">@RequestBody</span> <span class="type">UpdateCustomerRequest</span> req) {
+    <span class="keyword">return</span> ResponseEntity.ok(customerService.update(user, id, req));
+  }
+
+  <span class="annotation">@DeleteMapping</span>(<span class="string">"/{id}"</span>)
+  <span class="keyword">public</span> <span class="type">ResponseEntity</span>&lt;<span class="type">Void</span>&gt; delete(
+      <span class="annotation">@AuthenticationPrincipal</span> <span class="type">UserDetails</span> user,
+      <span class="annotation">@PathVariable</span> <span class="type">UUID</span> id) {
+    customerService.delete(user, id);
+    <span class="keyword">return</span> ResponseEntity.noContent().build();
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step-card" id="step6">
+      <div class="step-header">
+        <div class="step-badge backend">🔐</div>
+        <div class="step-info">
+          <h3>Step 6 — JWT Auth & Security Config</h3>
+          <p>Secure your API with Spring Security and JWT tokens.</p>
+          <span class="step-time">⏱ ~2 hours</span>
+        </div>
+      </div>
+
+      <div class="info-box tip">
+        <div class="info-box-icon">💡</div>
+        <div class="info-box-text"><b>Architecture tip</b>Use a JwtFilter that extends OncePerRequestFilter. It reads the Bearer token from each request, validates it, and sets the SecurityContext. All protected endpoints then automatically know who is logged in.</div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Security Config</div>
+        <div class="code-block">
+          <div class="code-label">config/SecurityConfig.java</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="annotation">@Configuration</span>
+<span class="annotation">@EnableWebSecurity</span>
+<span class="annotation">@RequiredArgsConstructor</span>
+<span class="keyword">public class</span> <span class="type">SecurityConfig</span> {
+
+  <span class="keyword">private final</span> <span class="type">JwtFilter</span> jwtFilter;
+
+  <span class="annotation">@Bean</span>
+  <span class="keyword">public</span> <span class="type">SecurityFilterChain</span> filterChain(<span class="type">HttpSecurity</span> http) <span class="keyword">throws</span> <span class="type">Exception</span> {
+    <span class="keyword">return</span> http
+      .csrf(csrf -> csrf.disable())
+      .cors(Customizer.withDefaults())
+      .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))
+      .authorizeHttpRequests(auth -> auth
+        .requestMatchers(<span class="string">"/api/auth/**"</span>).permitAll()
+        .anyRequest().authenticated()
+      )
+      .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+      .build();
+  }
+
+  <span class="annotation">@Bean</span>
+  <span class="keyword">public</span> <span class="type">CorsConfigurationSource</span> corsConfigurationSource() {
+    <span class="keyword">var</span> config = <span class="keyword">new</span> <span class="type">CorsConfiguration</span>();
+    config.setAllowedOrigins(List.of(<span class="string">"http://localhost:5173"</span>));
+    config.setAllowedMethods(List.of(<span class="string">"GET"</span>, <span class="string">"POST"</span>, <span class="string">"PUT"</span>, <span class="string">"DELETE"</span>));
+    config.setAllowedHeaders(List.of(<span class="string">"*"</span>));
+    config.setAllowCredentials(true);
+    <span class="keyword">var</span> source = <span class="keyword">new</span> <span class="type">UrlBasedCorsConfigurationSource</span>();
+    source.registerCorsConfiguration(<span class="string">"/**"</span>, config);
+    <span class="keyword">return</span> source;
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Phase 2 Checklist</div>
+        <div class="checklist" id="checklist-backend">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Set up PostgreSQL locally (or use Docker)</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Run Flyway migration — confirm tables created</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Implement User, Customer, Reminder entities</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Build CustomerService with all CRUD operations</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Implement JWT filter and auth endpoints</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Test all endpoints with Postman / IntelliJ HTTP client</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PHASE 3: FRONTEND ══════════════════ -->
+  <div class="phase">
+    <div class="phase-title">⚛ Phase 3 — React Frontend</div>
+
+    <!-- STEP 7 -->
+    <div class="step-card" id="step7">
+      <div class="step-header">
+        <div class="step-badge frontend">⚛</div>
+        <div class="step-info">
+          <h3>Step 7 — React App Structure</h3>
+          <p>Set up routing, global state, and API service layer.</p>
+          <span class="step-time">⏱ ~1 hour</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Routing Setup (React Router v6)</div>
+        <div class="code-block">
+          <div class="code-label">src/App.jsx</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="keyword">import</span> { BrowserRouter, Routes, Route, Navigate } from <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">export default function</span> <span class="type">App</span>() {
+  <span class="keyword">return</span> (
+    &lt;<span class="type">BrowserRouter</span>&gt;
+      &lt;<span class="type">Routes</span>&gt;
+        &lt;<span class="type">Route</span> path=<span class="string">"/login"</span> element={&lt;<span class="type">LoginPage</span> /&gt;} /&gt;
+        &lt;<span class="type">Route</span> path=<span class="string">"/register"</span> element={&lt;<span class="type">RegisterPage</span> /&gt;} /&gt;
+        &lt;<span class="type">Route</span> element={&lt;<span class="type">ProtectedRoute</span> /&gt;}&gt;
+          &lt;<span class="type">Route</span> path=<span class="string">"/"</span> element={&lt;<span class="type">DashboardPage</span> /&gt;} /&gt;
+          &lt;<span class="type">Route</span> path=<span class="string">"/customers"</span> element={&lt;<span class="type">CustomersPage</span> /&gt;} /&gt;
+          &lt;<span class="type">Route</span> path=<span class="string">"/customers/:id"</span> element={&lt;<span class="type">CustomerProfilePage</span> /&gt;} /&gt;
+          &lt;<span class="type">Route</span> path=<span class="string">"/reminders"</span> element={&lt;<span class="type">RemindersPage</span> /&gt;} /&gt;
+          &lt;<span class="type">Route</span> path=<span class="string">"/analytics"</span> element={&lt;<span class="type">AnalyticsPage</span> /&gt;} /&gt;
+        &lt;/<span class="type">Route</span>&gt;
+        &lt;<span class="type">Route</span> path=<span class="string">"*"</span> element={&lt;<span class="type">Navigate</span> to=<span class="string">"/"</span> /&gt;} /&gt;
+      &lt;/<span class="type">Routes</span>&gt;
+    &lt;/<span class="type">BrowserRouter</span>&gt;
+  );
+}</pre>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">API Service Layer</div>
+        <div class="code-block">
+          <div class="code-label">src/services/api.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="keyword">import</span> axios from <span class="string">'axios'</span>;
+
+<span class="keyword">const</span> api = axios.create({
+  baseURL: <span class="keyword">import</span>.meta.env.VITE_API_URL || <span class="string">'http://localhost:8080/api'</span>,
+});
+
+<span class="comment">// Attach JWT to every request automatically</span>
+api.interceptors.request.use(config => {
+  <span class="keyword">const</span> token = localStorage.getItem(<span class="string">'token'</span>);
+  <span class="keyword">if</span> (token) config.headers.Authorization = <span class="string">`Bearer ${token}`</span>;
+  <span class="keyword">return</span> config;
+});
+
+<span class="comment">// Auto-logout on 401</span>
+api.interceptors.response.use(null, err => {
+  <span class="keyword">if</span> (err.response?.status === 401) {
+    localStorage.removeItem(<span class="string">'token'</span>);
+    window.location.href = <span class="string">'/login'</span>;
+  }
+  <span class="keyword">return</span> Promise.reject(err);
+});
+
+<span class="keyword">export const</span> customerService = {
+  list: (page, tag) => api.get(<span class="string">`/customers`</span>, { params: { page, tag } }),
+  get:  (id) => api.get(<span class="string">`/customers/${id}`</span>),
+  create: (data) => api.post(<span class="string">'/customers'</span>, data),
+  update: (id, data) => api.put(<span class="string">`/customers/${id}`</span>, data),
+  delete: (id) => api.delete(<span class="string">`/customers/${id}`</span>),
+  search: (q) => api.get(<span class="string">`/customers/search`</span>, { params: { q } }),
+};
+
+<span class="keyword">export const</span> reminderService = {
+  list:     () => api.get(<span class="string">'/reminders'</span>),
+  create:   (data) => api.post(<span class="string">'/reminders'</span>, data),
+  complete: (id) => api.put(<span class="string">`/reminders/${id}/complete`</span>),
+};
+
+<span class="keyword">export const</span> analyticsService = {
+  summary:  () => api.get(<span class="string">'/analytics/summary'</span>),
+  segments: () => api.get(<span class="string">'/analytics/segments'</span>),
+};
+
+<span class="keyword">export default</span> api;</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 8 -->
+    <div class="step-card" id="step8">
+      <div class="step-header">
+        <div class="step-badge frontend">🎨</div>
+        <div class="step-info">
+          <h3>Step 8 — Build Core Screens</h3>
+          <p>Implement the 5 main pages based on the wireframes.</p>
+          <span class="step-time">⏱ ~4-6 hours</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Screen Build Order (recommended)</div>
+        <div class="checklist">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>1. Login / Register</b> — auth forms, JWT storage</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>2. Layout / Sidebar</b> — shared nav wrapper</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>3. Customer List</b> — table/cards + search + tag filter</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>4. Add Customer Form</b> — validation + submit</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>5. Customer Profile</b> — tabs + interaction timeline</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>6. Reminders</b> — due-today list + mark done</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>7. Dashboard</b> — stats cards + chart (Recharts)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>8. Analytics</b> — segment breakdown + top customers</div></div>
+        </div>
+      </div>
+
+      <div class="info-box note">
+        <div class="info-box-icon">📌</div>
+        <div class="info-box-text"><b>Recommended UI Libraries</b>Use <b>Tailwind CSS</b> for styling, <b>Recharts</b> for the analytics charts, <b>React Hook Form</b> for all forms, and <b>TanStack Query</b> for data fetching and caching. These four together cover everything you need.</div>
+      </div>
+    </div>
+
+    <!-- STEP 9 -->
+    <div class="step-card" id="step9">
+      <div class="step-header">
+        <div class="step-badge frontend">🔗</div>
+        <div class="step-info">
+          <h3>Step 9 — API Integration & State</h3>
+          <p>Wire up React Query hooks for real data fetching.</p>
+          <span class="step-time">⏱ ~2 hours</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Custom Hooks with React Query</div>
+        <div class="code-block">
+          <div class="code-label">src/hooks/useCustomers.js</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="keyword">import</span> { useQuery, useMutation, useQueryClient } from <span class="string">'@tanstack/react-query'</span>;
+<span class="keyword">import</span> { customerService } from <span class="string">'../services/api'</span>;
+
+<span class="keyword">export function</span> useCustomers(page = 0, tag = null) {
+  <span class="keyword">return</span> useQuery({
+    queryKey: [<span class="string">'customers'</span>, page, tag],
+    queryFn: () => customerService.list(page, tag).then(r => r.data),
+    keepPreviousData: true,
+  });
+}
+
+<span class="keyword">export function</span> useCreateCustomer() {
+  <span class="keyword">const</span> qc = useQueryClient();
+  <span class="keyword">return</span> useMutation({
+    mutationFn: customerService.create,
+    onSuccess: () => qc.invalidateQueries([<span class="string">'customers'</span>]),
+  });
+}
+
+<span class="keyword">export function</span> useDeleteCustomer() {
+  <span class="keyword">const</span> qc = useQueryClient();
+  <span class="keyword">return</span> useMutation({
+    mutationFn: customerService.delete,
+    onSuccess: () => qc.invalidateQueries([<span class="string">'customers'</span>]),
+  });
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PHASE 4: DEPLOY ══════════════════ -->
+  <div class="phase">
+    <div class="phase-title">🚀 Phase 4 — Docker & Deploy</div>
+
+    <!-- STEP 10 -->
+    <div class="step-card" id="step10">
+      <div class="step-header">
+        <div class="step-badge deploy">🐳</div>
+        <div class="step-info">
+          <h3>Step 10 — Dockerize & Deploy</h3>
+          <p>Package both services and deploy to any cloud or VPS.</p>
+          <span class="step-time">⏱ ~2 hours</span>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">docker-compose.yml</div>
+        <div class="code-block">
+          <div class="code-label">docker-compose.yml</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre>version: <span class="string">'3.8'</span>
+services:
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: retailcrm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - <span class="string">"5432:5432"</span>
+
+  backend:
+    build: ./backend
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: secret
+      JWT_SECRET: your-super-secret-key-change-in-prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/retailcrm
+    ports:
+      - <span class="string">"8080:8080"</span>
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - <span class="string">"80:80"</span>
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:</pre>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Backend Dockerfile</div>
+        <div class="code-block">
+          <div class="code-label">backend/Dockerfile</div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="comment"># Stage 1 — Build</span>
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src ./src
+RUN mvn package -DskipTests
+
+<span class="comment"># Stage 2 — Run (smaller image)</span>
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]</pre>
+        </div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Deploy Options</div>
+        <div class="checklist">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>Railway.app</b> — easiest, free tier, auto-deploys from GitHub</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>Render.com</b> — good free tier, Java + PostgreSQL supported</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>DigitalOcean Droplet</b> — $6/mo VPS, full control, docker-compose works directly</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div><b>AWS / GCP</b> — enterprise scale, more complex setup</div></div>
+        </div>
+      </div>
+
+      <div class="info-box warn">
+        <div class="info-box-icon">⚠️</div>
+        <div class="info-box-text"><b>Before going live</b>Change JWT_SECRET to a strong random string (min 32 chars), set DB password to something secure, add HTTPS via Let's Encrypt or your cloud provider's SSL, and set CORS to your real domain only.</div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label">Final Launch Checklist</div>
+        <div class="checklist">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>All API endpoints tested end-to-end</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Auth flow working (register → login → protected routes)</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Mobile responsive frontend</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Environment variables set for production</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>HTTPS configured</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Payment set up (Stripe / Lemon Squeezy for one-time purchase)</div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div>Landing page with pricing tiers live</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+  function setActive(el) {
+    setTimeout(() => {
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+    }, 10);
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    if (el.classList.contains('checked')) {
+      el.querySelector('.check-box').textContent = '✓';
+    } else {
+      el.querySelector('.check-box').textContent = '';
+    }
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const all = document.querySelectorAll('.check-item').length;
+    const done = document.querySelectorAll('.check-item.checked').length;
+    const pct = Math.round((done / all) * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+  }
+
+  function copyCode(btn) {
+    const code = btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  // Highlight active sidebar item on scroll
+  const steps = document.querySelectorAll('.step-card');
+  window.addEventListener('scroll', () => {
+    steps.forEach(step => {
+      const rect = step.getBoundingClientRect();
+      if (rect.top >= 0 && rect.top < window.innerHeight / 2) {
+        const link = document.querySelector(`.sidebar-link[href="#${step.id}"]`);
+        if (link) {
+          document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>
